@@ -1,0 +1,22 @@
+# Name of the workflow
+name: My First Workflow
+# When the workflow should be triggered and on which branches (main and feature/* branches in this case) when a push event occurs
+on: 
+  push:
+
+# Jobs to be executed 
+jobs:
+    first_job:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Run a script
+              run: echo "Hello World"
+
+            - name: List files
+              run: ls -al
+
+            - name: Read file content
+              run: cat README.md

@@ -1,0 +1,50 @@
+name: Multiple Jobs Example
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Cowsay
+      run: sudo apt-get install cowsay -y
+
+    - name: Generate ASCII Art
+      run: cowsay -f dragon "Hello, World!" > ascii_art.txt
+
+    - name: Upload ASCII Art
+      uses: actions/upload-artifact@v3
+      with:
+        name: ascii_art
+        path: ascii_art.txt
+
+  test:
+    needs: build 
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download ASCII Art
+      uses: actions/download-artifact@v3
+      with:
+        name: ascii_art
+         
+    - name: Test file exists
+      run: grep -i "Hello, World!" ascii_art.txt
+ 
+  Display:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download ASCII Art
+      uses: actions/download-artifact@v3
+      with:
+        name: ascii_art
+         
+    - name: Display ASCII Art
+      run: cat ascii_art.txt 

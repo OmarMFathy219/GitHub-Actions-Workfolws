@@ -1,0 +1,17 @@
+name: Execute Script
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Execute Shell Script
+      run: |
+        chmod +x ascii-script.sh
+        ./ascii-script.sh

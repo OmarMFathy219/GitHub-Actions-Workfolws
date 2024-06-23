@@ -1,0 +1,24 @@
+name: Generate ASCII Art
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Cowsay
+      run: sudo apt-get install cowsay -y
+
+    - name: Generate ASCII Art
+      run: cowsay -f dragon "Hello, World!" > ascii_art.txt
+
+    - name: Test file exists
+      run: grep -i "Hello, World!" ascii_art.txt
+
+    - name: Display ASCII Art
+      run: cat ascii_art.txt
