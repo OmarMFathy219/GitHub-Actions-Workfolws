@@ -5,8 +5,6 @@ on:
     
 env:
   CONTAINER_REGISTRY: docker.io
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   IMAGE_NAME: nginx
 
 jobs:
@@ -19,7 +17,14 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t $CONTAINER_REGISTRY/$DOCKER_USERNAME/$IMAGE_NAME:latest .
+        docker build -t ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+        docker save ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+
+    - name: Upload Docker Image
+      uses: actions/upload-artifact@v3
+      with:
+        name: docker-image
+        path: image.tar.gz
     
   deploy:
     needs: build
@@ -29,10 +34,20 @@ jobs:
       cancel-in-progress: true
 
     steps:
+    - name: Download Docker Image
+      uses: actions/download-artifact@v3
+      with:
+        name: docker-image
+        path: image.tar.gz
+
+    - name: Load Docker Image
+      run: |
+        gunzip -c image.tar.gz | docker load
+
     - name: Docker Login
       run: |
-        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $CONTAINER_REGISTRY
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
 
     - name: Docker Push
       run: |
-        docker push $CONTAINER_REGISTRY/$DOCKER_USERNAME/$IMAGE_NAME:latest
+        docker push ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
