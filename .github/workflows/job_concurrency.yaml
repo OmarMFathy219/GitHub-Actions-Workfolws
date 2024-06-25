@@ -1,4 +1,4 @@
-name: Variables and Secrets
+name: Job Concurrency
 
 on:
   push:
