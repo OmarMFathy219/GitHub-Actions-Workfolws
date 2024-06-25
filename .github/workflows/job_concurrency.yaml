@@ -56,3 +56,4 @@ jobs:
     - name: Docker Push
       run: |
         docker push ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+        sleep 100
