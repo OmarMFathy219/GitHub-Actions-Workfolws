@@ -24,7 +24,7 @@ jobs:
       run: gzip image.tar
 
     - name: Upload Docker Image
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: docker-image
         path: image.tar.gz
@@ -39,7 +39,7 @@ jobs:
 
     steps:
     - name: Download Docker Image
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: docker-image
 
@@ -57,4 +57,3 @@ jobs:
       run: |
         docker push ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
         sleep 100
-        
