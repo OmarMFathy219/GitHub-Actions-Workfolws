@@ -1,0 +1,60 @@
+name: Job Timeout
+
+on:
+  workflow_dispatch
+    
+env:
+  CONTAINER_REGISTRY: docker.io
+  IMAGE_NAME: nginx
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
+        docker save ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest -o image.tar
+
+    - name: Compress Docker Image
+      run: gzip image.tar
+
+    - name: Upload Docker Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image
+        path: image.tar.gz
+    
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: production-deploy
+      # cancel-in-progress: true
+      cancel-in-progress: false
+    timeout-minutes: 1
+
+    steps:
+    - name: Download Docker Image
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-image
+
+    - name: Decompress Docker Image
+      run: gunzip image.tar.gz
+
+    - name: Load Docker Image
+      run: docker load -i image.tar
+
+    - name: Docker Login
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin ${{ env.CONTAINER_REGISTRY }}
+
+    - name: Docker Push
+      run: |
+        docker push ${{ env.CONTAINER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+        sleep 100
