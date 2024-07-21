@@ -1,0 +1,35 @@
+name: Workflow Event Filters and Activities
+on: 
+  push:
+    branches:
+      - main            # Only run the workflow on the main branch
+      - '!feature/*'    # Ignore feature branches (feature/add-music, feature/add-video, etc.)
+
+      # branches-ignore:
+      # - feature/*      # Ignore feature branches (feature/add-music, feature/add-video, etc.)
+      # - test/**        # Ignore test branches (test/ui/index, test/checkout/payment, etc.)
+
+  pull_request:
+    types:
+      - opened
+      - closed
+    paths-ignore:
+      - README.md      # workflow will only run when a pull request is opened or closed on any file except README.md
+    branches:
+      - main           # Only run the workflow on the main branch
+
+jobs:
+    first_job:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Run a script
+              run: echo "Hello World"
+
+            - name: List files
+              run: ls -al
+
+            - name: Read file content
+              run: cat README.md
